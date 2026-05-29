@@ -8,6 +8,44 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
+// ── PASSWORTSCHUTZ ────────────────────────────────────────────
+const APP_PASSWORD = process.env.APP_PASSWORD || "agri2025";
+
+app.use((req, res, next) => {
+  // API-Routen und Login-Seite sind frei
+  if (req.path.startsWith("/api/") || req.path === "/login") return next();
+  // Auth-Cookie prüfen
+  const cookies = req.headers.cookie || "";
+  if (cookies.includes("agri_auth=ok")) return next();
+  // Nicht eingeloggt → Login-Seite
+  res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Agri Syria – Login</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#1B3A28;display:flex;align-items:center;justify-content:center;height:100vh}
+.box{background:#fff;border-radius:16px;padding:2.5rem;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.ico{font-size:48px;margin-bottom:12px}.h{font-size:22px;font-weight:700;color:#1B3A28;margin-bottom:6px}
+.sub{font-size:13px;color:#888;margin-bottom:1.5rem}
+input{width:100%;padding:12px;border:1.5px solid #ddd;border-radius:8px;font-size:15px;margin-bottom:12px;text-align:center}
+input:focus{outline:none;border-color:#1B3A28}
+button{width:100%;padding:12px;background:#1B3A28;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-weight:600}
+button:hover{background:#264D35}.err{color:#c00;font-size:13px;margin-top:8px;display:none}</style></head>
+<body><div class="box"><div class="ico">🌾</div><div class="h">Agri Syria Export</div>
+<div class="sub">Bitte Passwort eingeben</div>
+<form method="POST" action="/login">
+<input type="password" name="pw" placeholder="Passwort" autofocus>
+<button type="submit">Anmelden →</button>
+</form><div class="err" id="err">Falsches Passwort</div>
+${req.query.err ? '<script>document.getElementById("err").style.display="block"</script>' : ''}
+</div></body></html>`);
+});
+
+app.post("/login", express.urlencoded({ extended: false }), (req, res) => {
+  if (req.body.pw === APP_PASSWORD) {
+    res.setHeader("Set-Cookie", "agri_auth=ok; Path=/; HttpOnly; Max-Age=2592000");
+    res.redirect("/");
+  } else {
+    res.redirect("/login?err=1");
+  }
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 // ── DATENBANK ──────────────────────────────────────────────────
