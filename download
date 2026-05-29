@@ -1,0 +1,9 @@
+# Anthropic API Key (Pflicht)
+ANTHROPIC_API_KEY=sk-ant-DEIN-KEY-HIER
+
+# Datenbank-Pfad (Optional - Standard: datenbank.json im Programmordner)
+# Für OneDrive: Pfad zu deinem OneDrive-Ordner eintragen
+# Windows Beispiel:
+# DB_PATH=C:\Users\weiss\OneDrive\Syria-Agri\datenbank.json
+# Mac Beispiel:
+# DB_PATH=/Users/DEIN_NAME/OneDrive/Syria-Agri/datenbank.json
